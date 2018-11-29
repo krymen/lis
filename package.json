@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/krymen/lis/issues"
   },
-  "homepage": "https://github.com/krymen/lis#readme"
+  "homepage": "https://github.com/krymen/lis#readme",
+  "devDependencies": {
+    "jest": "^23.6.0"
+  }
 }
