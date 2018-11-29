@@ -13,21 +13,21 @@ const binarySearch = (leftIndex, rightIndex, isOnTheRight) => {
 const findLongestPossibleSubsequenceLengthFor = (element, intermediateComputations, inputSequence) =>
   binarySearch(
     1,
-    intermediateComputations.longestIncreasingSubsequenceLength,
-    index => inputSequence[intermediateComputations.lastElementIndexBySubsequenceLength[index]] < element
+    intermediateComputations.longestSubsequenceLength,
+    index => inputSequence[intermediateComputations.lastIndexBySubsequenceLength.get(index)] < element
   );
 
-const reconstructLongestIncreasingSubsequence = (intermediateComputations, inputSequence) => {
-  const longestIncreasingSubsequence = new Array(intermediateComputations.longestIncreasingSubsequenceLength);
+const reconstructLongestSubsequence = (intermediateComputations, inputSequence) => {
+  const longestSubsequence = new Array(intermediateComputations.longestSubsequenceLength);
 
-  let lastElementIndex = intermediateComputations.lastElementIndexOfLongestIncreasingSubsequence();
+  let lastIndex = intermediateComputations.lastIndexOfLongestSubsequence();
 
-  for (index = intermediateComputations.longestIncreasingSubsequenceLength - 1; index > -1; index--) {
-    longestIncreasingSubsequence[index] = inputSequence[lastElementIndex];
-    lastElementIndex = intermediateComputations.predecessorsByIndex[lastElementIndex];
+  for (index = intermediateComputations.longestSubsequenceLength - 1; index > -1; index--) {
+    longestSubsequence[index] = inputSequence[lastIndex];
+    lastIndex = intermediateComputations.getPredecessor(lastIndex);
   }
 
-  return longestIncreasingSubsequence;
+  return longestSubsequence;
 };
 
 const longestIncreasingSubsequence = inputSequence => {
@@ -36,18 +36,22 @@ const longestIncreasingSubsequence = inputSequence => {
   }
 
   const intermediateComputations = {
-    lastElementIndexBySubsequenceLength: new Array(1),
-    predecessorsByIndex: new Array(1),
-    longestIncreasingSubsequenceLength: 0,
+    lastIndexBySubsequenceLength: new Map(),
+    predecessorsByIndex: new Map(),
+    longestSubsequenceLength: 0,
 
     updateSubsequenceLengthWithIndex: function(length, index) {
-      this.predecessorsByIndex[index] = this.lastElementIndexBySubsequenceLength[length - 1];
-      this.lastElementIndexBySubsequenceLength[length] = index;
-      this.longestIncreasingSubsequenceLength = Math.max(length, this.longestIncreasingSubsequenceLength);
+      this.predecessorsByIndex.set(index, this.lastIndexBySubsequenceLength.get(length - 1));
+      this.lastIndexBySubsequenceLength.set(length, index);
+      this.longestSubsequenceLength = Math.max(length, this.longestSubsequenceLength);
     },
 
-    lastElementIndexOfLongestIncreasingSubsequence: function() {
-      return this.lastElementIndexBySubsequenceLength[this.longestIncreasingSubsequenceLength];
+    lastIndexOfLongestSubsequence: function() {
+      return this.lastIndexBySubsequenceLength.get(this.longestSubsequenceLength);
+    },
+
+    getPredecessor: function(index) {
+      return this.predecessorsByIndex.get(index);
     }
   };
 
@@ -61,7 +65,7 @@ const longestIncreasingSubsequence = inputSequence => {
     intermediateComputations.updateSubsequenceLengthWithIndex(longestPossibleSubsequenceLength, index);
   });
 
-  return reconstructLongestIncreasingSubsequence(intermediateComputations, inputSequence);
+  return reconstructLongestSubsequence(intermediateComputations, inputSequence);
 };
 
 module.exports = longestIncreasingSubsequence;
