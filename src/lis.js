@@ -10,26 +10,21 @@ const binarySearch = (leftIndex, rightIndex, isOnTheRight) => {
     : binarySearch(leftIndex, middle - 1, isOnTheRight);
 };
 
-const findLongestPossibleSubsequenceLengthFor = (element, intermediateSubsequences, inputSequence) =>
+const findLongestPossibleSubsequenceLengthFor = (element, intermediateComputations, inputSequence) =>
   binarySearch(
     1,
-    intermediateSubsequences.length - 1,
-    index => inputSequence[intermediateSubsequences[index]] < element
+    intermediateComputations.longestIncreasingSubsequenceLength,
+    index => inputSequence[intermediateComputations.lastElementIndexBySubsequenceLength[index]] < element
   );
 
-const reconstructLongestIncreasingSubsequence = (
-  lastElementIndexBySubsequenceLength,
-  predecessorsByIndex,
-  inputSequence
-) => {
-  const longestIncreasingSubsequenceLength = lastElementIndexBySubsequenceLength.length - 1;
-  const longestIncreasingSubsequence = new Array(longestIncreasingSubsequenceLength);
+const reconstructLongestIncreasingSubsequence = (intermediateComputations, inputSequence) => {
+  const longestIncreasingSubsequence = new Array(intermediateComputations.longestIncreasingSubsequenceLength);
 
-  let lastElementIndex = lastElementIndexBySubsequenceLength[longestIncreasingSubsequenceLength];
+  let lastElementIndex = intermediateComputations.lastElementIndexOfLongestIncreasingSubsequence();
 
-  for (index = longestIncreasingSubsequenceLength - 1; index > -1; index--) {
+  for (index = intermediateComputations.longestIncreasingSubsequenceLength - 1; index > -1; index--) {
     longestIncreasingSubsequence[index] = inputSequence[lastElementIndex];
-    lastElementIndex = predecessorsByIndex[lastElementIndex];
+    lastElementIndex = intermediateComputations.predecessorsByIndex[lastElementIndex];
   }
 
   return longestIncreasingSubsequence;
@@ -40,25 +35,33 @@ const longestIncreasingSubsequence = inputSequence => {
     throw TypeError('Expected array as an argument.');
   }
 
-  const lastElementIndexBySubsequenceLength = new Array(1);
-  const predecessorsByIndex = new Array(1);
+  const intermediateComputations = {
+    lastElementIndexBySubsequenceLength: new Array(1),
+    predecessorsByIndex: new Array(1),
+    longestIncreasingSubsequenceLength: 0,
+
+    updateSubsequenceLengthWithIndex: function(length, index) {
+      this.predecessorsByIndex[index] = this.lastElementIndexBySubsequenceLength[length - 1];
+      this.lastElementIndexBySubsequenceLength[length] = index;
+      this.longestIncreasingSubsequenceLength = Math.max(length, this.longestIncreasingSubsequenceLength);
+    },
+
+    lastElementIndexOfLongestIncreasingSubsequence: function() {
+      return this.lastElementIndexBySubsequenceLength[this.longestIncreasingSubsequenceLength];
+    }
+  };
 
   inputSequence.forEach((element, index) => {
-    const longestSubsequenceLength = findLongestPossibleSubsequenceLengthFor(
+    const longestPossibleSubsequenceLength = findLongestPossibleSubsequenceLengthFor(
       element,
-      lastElementIndexBySubsequenceLength,
+      intermediateComputations,
       inputSequence
     );
 
-    predecessorsByIndex[index] = lastElementIndexBySubsequenceLength[longestSubsequenceLength - 1];
-    lastElementIndexBySubsequenceLength[longestSubsequenceLength] = index;
+    intermediateComputations.updateSubsequenceLengthWithIndex(longestPossibleSubsequenceLength, index);
   });
 
-  return reconstructLongestIncreasingSubsequence(
-    lastElementIndexBySubsequenceLength,
-    predecessorsByIndex,
-    inputSequence
-  );
+  return reconstructLongestIncreasingSubsequence(intermediateComputations, inputSequence);
 };
 
 module.exports = longestIncreasingSubsequence;
