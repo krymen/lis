@@ -7,6 +7,9 @@ Remove items from the list in such a way that the rest items were sorted ascendi
 The solution for the above array is: `[1, 3, 7, 10, 12, 16]`
 
 The implementation should:
+
 - be a function, take an array and return an array
 - not use external modules
 - be implemented in node.js
+
+Solution based on [Wikipedia](https://en.wikipedia.org/wiki/Longest_increasing_subsequence).
