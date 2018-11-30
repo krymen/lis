@@ -56,6 +56,10 @@ const longestIncreasingSubsequence = inputSequence => {
   };
 
   inputSequence.forEach((element, index) => {
+    if (typeof element !== 'number') {
+      return;
+    }
+
     const longestPossibleSubsequenceLength = findLongestPossibleSubsequenceLengthFor(
       element,
       intermediateComputations,
